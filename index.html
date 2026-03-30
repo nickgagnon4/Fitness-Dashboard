@@ -152,7 +152,7 @@
     <p class="section-head">Macro progress</p>
     <div id="macro-bars"></div>
     <p class="section-head" style="margin-top:20px;">Protein note</p>
-    <div class="note-box">Your 0.7g/kg target = <strong>51g/day</strong>. Research supports <strong>1.6–2.2g/kg (116–160g)</strong> for optimal muscle growth. Consider targeting <strong>130g+</strong> for better results while keeping calories the same.</div>
+    <div class="note-box">Your 0.7g/lb target = <strong>112g/day</strong>. This is a solid target — right in the sweet spot for muscle building. Research supports 0.7–1g/lb for optimal hypertrophy.</div>
   </div>
 
   <!-- WORKOUT -->
@@ -222,8 +222,8 @@
 </div>
 
 <script>
-const WT_KG = 72.7;
-const PROTEIN_G = Math.round(0.7 * WT_KG);
+const WT_LBS = 160;
+const PROTEIN_G = Math.round(0.7 * WT_LBS);
 const FAT_G = 64;
 const TOTAL_CAL = 2600;
 const CARB_G = Math.round((TOTAL_CAL - PROTEIN_G * 4 - FAT_G * 9) / 4);
@@ -305,7 +305,7 @@ function initNutrition() {
     '<strong>Your daily targets:</strong> ' + TOTAL_CAL + ' kcal &middot; ' + PROTEIN_G + 'g protein &middot; ' + FAT_G + 'g fat &middot; ' + CARB_G + 'g carbs. Based on your TDEE (~2,480 cal) + ~120 cal surplus for lean muscle gain.';
   document.getElementById('macro-metrics').innerHTML =
     '<div class="metric"><div class="metric-label">Calories</div><div class="metric-val">'+TOTAL_CAL+'</div><div class="metric-sub">kcal / day</div></div>' +
-    '<div class="metric"><div class="metric-label">Protein</div><div class="metric-val">'+PROTEIN_G+'g</div><div class="metric-sub">0.7g/kg goal</div></div>' +
+    '<div class="metric"><div class="metric-label">Protein</div><div class="metric-val">'+PROTEIN_G+'g</div><div class="metric-sub">0.7g/lb goal</div></div>' +
     '<div class="metric"><div class="metric-label">Carbs</div><div class="metric-val">'+CARB_G+'g</div><div class="metric-sub">primary fuel</div></div>' +
     '<div class="metric"><div class="metric-label">Fat</div><div class="metric-val">'+FAT_G+'g</div><div class="metric-sub">0.4g / lb</div></div>';
   renderMacroBars(0,0,0,0);
