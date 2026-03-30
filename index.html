@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="FitDash">
+<title>FitDash</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg2: #f5f5f3;
+    --bg3: #eeede8;
+    --text: #1a1a18;
+    --text2: #6b6b67;
+    --text3: #9e9e9a;
+    --border: rgba(0,0,0,0.12);
+    --border2: rgba(0,0,0,0.22);
+    --radius: 10px;
+    --radius-lg: 14px;
+    --accent: #185FA5;
+    --accent-bg: #E6F1FB;
+    --green: #3B6D11;
+    --green-bg: #EAF3DE;
+    --amber: #854F0B;
+    --amber-bg: #FAEEDA;
+    --teal: #0F6E56;
+    --teal-bg: #E1F5EE;
+    --coral: #993C1D;
+    --coral-bg: #FAECE7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1a;
+      --bg2: #252523;
+      --bg3: #2e2e2b;
+      --text: #f0efe8;
+      --text2: #a0a09a;
+      --text3: #6e6e68;
+      --border: rgba(255,255,255,0.1);
+      --border2: rgba(255,255,255,0.2);
+      --accent: #85B7EB;
+      --accent-bg: #0C447C;
+      --green: #C0DD97;
+      --green-bg: #27500A;
+      --amber: #FAC775;
+      --amber-bg: #633806;
+      --teal: #9FE1CB;
+      --teal-bg: #085041;
+      --coral: #F0997B;
+      --coral-bg: #712B13;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; }
+  .app { max-width: 560px; margin: 0 auto; background: var(--bg); min-height: 100vh; position: relative; }
+  header { padding: 20px 20px 0; border-bottom: 0.5px solid var(--border); }
+  .app-title { font-size: 22px; font-weight: 600; letter-spacing: -0.5px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+  .app-title span { font-size: 20px; }
+  .tabs { display: flex; gap: 0; overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { padding: 10px 16px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; background: none; color: var(--text2); border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; transition: color 0.15s; }
+  .tab.active { color: var(--text); border-bottom: 2px solid var(--text); }
+  .panel { display: none; padding: 20px; } .panel.active { display: block; }
+  .metrics { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
+  .metrics-4 { grid-template-columns: repeat(2, 1fr); }
+  .metric { background: var(--bg2); border-radius: var(--radius); padding: 14px 14px; }
+  .metric-label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; }
+  .metric-val { font-size: 24px; font-weight: 600; color: var(--text); line-height: 1; }
+  .metric-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+  .section-head { font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.07em; margin: 22px 0 12px; }
+  .note-box { background: var(--bg2); border-radius: var(--radius); padding: 12px 14px; font-size: 13px; color: var(--text2); line-height: 1.6; margin-bottom: 16px; border-left: 3px solid var(--accent); }
+  .note-box strong { color: var(--text); }
+  .macro-bar { margin-bottom: 12px; }
+  .macro-row { display: flex; align-items: center; gap: 10px; }
+  .macro-name { font-size: 13px; color: var(--text2); width: 72px; flex-shrink: 0; }
+  .macro-track { flex: 1; height: 8px; background: var(--bg3); border-radius: 4px; overflow: hidden; }
+  .macro-fill { height: 100%; border-radius: 4px; transition: width 0.3s ease; }
+  .macro-nums { font-size: 12px; color: var(--text2); width: 90px; text-align: right; flex-shrink: 0; }
+  .input-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .input-row label { font-size: 13px; color: var(--text2); width: 120px; flex-shrink: 0; }
+  .input-row input[type=number], .input-row select { font-size: 14px; padding: 8px 12px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg2); color: var(--text); width: 90px; }
+  .input-row select { width: auto; flex: 1; }
+  .input-row .hint { font-size: 12px; color: var(--text3); }
+  .day-card { border: 0.5px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 0; overflow: hidden; }
+  .header-row { display: grid; grid-template-columns: 1fr 64px 50px 88px; gap: 6px; padding: 0 14px 8px; }
+  .col-label { font-size: 11px; color: var(--text3); text-align: center; }
+  .lift-section-title { font-size: 10px; color: var(--text3); padding: 10px 14px 4px; text-transform: uppercase; letter-spacing: 0.05em; background: var(--bg2); }
+  .lift-row { display: grid; grid-template-columns: 1fr 64px 50px 88px; gap: 6px; align-items: center; padding: 8px 14px; border-bottom: 0.5px solid var(--border); }
+  .lift-row:last-child { border-bottom: none; }
+  .lift-name { font-size: 13px; color: var(--text); line-height: 1.3; }
+  .lift-scheme { font-size: 11px; color: var(--text3); }
+  .lift-field { width: 100%; font-size: 13px; padding: 6px 4px; border: 0.5px solid var(--border); border-radius: 6px; background: var(--bg2); color: var(--text); text-align: center; }
+  .lift-reps { width: 100%; font-size: 13px; padding: 6px 4px; border: 0.5px solid var(--border); border-radius: 6px; background: var(--bg2); color: var(--text); text-align: center; }
+  .progress-pill { font-size: 11px; padding: 3px 8px; border-radius: 20px; white-space: nowrap; display: inline-block; }
+  .pill-green { background: var(--green-bg); color: var(--green); }
+  .pill-amber { background: var(--amber-bg); color: var(--amber); }
+  .pill-blue { background: var(--accent-bg); color: var(--accent); }
+  .save-btn { width: 100%; margin-top: 16px; padding: 14px; font-size: 15px; font-weight: 500; cursor: pointer; background: var(--text); color: var(--bg); border: none; border-radius: var(--radius-lg); transition: opacity 0.15s; }
+  .save-btn:active { opacity: 0.7; }
+  .progress-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 0.5px solid var(--border); }
+  .progress-item:last-child { border-bottom: none; }
+  .prog-name { flex: 1; font-size: 13px; }
+  .prog-current { font-size: 14px; font-weight: 600; width: 58px; text-align: right; flex-shrink: 0; }
+  .prog-bar-wrap { width: 70px; height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; flex-shrink: 0; }
+  .prog-bar-fill { height: 100%; border-radius: 3px; background: var(--accent); }
+  .prog-target { font-size: 11px; color: var(--text3); width: 58px; text-align: right; flex-shrink: 0; }
+  .week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 20px; }
+  .week-day { border: 0.5px solid var(--border); border-radius: var(--radius); padding: 8px 4px; text-align: center; cursor: pointer; transition: background 0.15s; background: var(--bg2); }
+  .week-day.done { background: var(--accent-bg); border-color: var(--accent); }
+  .week-day.today { border: 1.5px solid var(--text); }
+  .week-day-label { font-size: 10px; color: var(--text2); }
+  .week-day-type { font-size: 9px; color: var(--text3); margin-top: 2px; line-height: 1.2; }
+  .check-mark { font-size: 13px; color: var(--accent); margin-top: 2px; opacity: 0; }
+  .week-day.done .check-mark { opacity: 1; }
+  .day-select-wrap { margin-bottom: 16px; }
+  .day-select-wrap select { width: 100%; font-size: 14px; padding: 10px 14px; border: 0.5px solid var(--border2); border-radius: var(--radius-lg); background: var(--bg2); color: var(--text); }
+  .update-row { display: flex; gap: 10px; align-items: center; margin-top: 8px; }
+  .update-row input { flex: 1; font-size: 14px; padding: 10px 12px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg2); color: var(--text); }
+  .update-row button { padding: 10px 18px; font-size: 13px; font-weight: 500; cursor: pointer; background: var(--text); color: var(--bg); border: none; border-radius: var(--radius); }
+  .deload-note { background: var(--amber-bg); color: var(--amber); border-radius: var(--radius); padding: 10px 14px; font-size: 12px; margin-top: 8px; line-height: 1.5; }
+  .week-counter { display: flex; align-items: center; gap: 14px; background: var(--bg2); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 16px; }
+  .week-num { font-size: 28px; font-weight: 600; }
+  .week-info { flex: 1; }
+  .week-info-label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; }
+  .week-info-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .wk-btn { padding: 6px 12px; font-size: 13px; cursor: pointer; background: var(--bg3); color: var(--text); border: 0.5px solid var(--border2); border-radius: 6px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="app-title"><span>💪</span> FitDash</div>
+    <div class="tabs">
+      <button class="tab active" onclick="showPanel('nutrition',this)">Nutrition</button>
+      <button class="tab" onclick="showPanel('workout',this)">Workout</button>
+      <button class="tab" onclick="showPanel('progress',this)">Progress</button>
+      <button class="tab" onclick="showPanel('schedule',this)">Schedule</button>
+    </div>
+  </header>
+
+  <!-- NUTRITION -->
+  <div id="panel-nutrition" class="panel active">
+    <div class="metrics metrics-4" id="macro-metrics"></div>
+    <div class="note-box" id="calorie-note"></div>
+    <p class="section-head">Log today's intake</p>
+    <div class="input-row"><label>Calories</label><input type="number" id="in-cal" placeholder="0" oninput="updateIntake()"><span class="hint" id="cal-remain"></span></div>
+    <div class="input-row"><label>Protein (g)</label><input type="number" id="in-pro" placeholder="0" oninput="updateIntake()"><span class="hint" id="pro-remain"></span></div>
+    <div class="input-row"><label>Carbs (g)</label><input type="number" id="in-carb" placeholder="0" oninput="updateIntake()"></div>
+    <div class="input-row"><label>Fat (g)</label><input type="number" id="in-fat" placeholder="0" oninput="updateIntake()"></div>
+    <p class="section-head">Macro progress</p>
+    <div id="macro-bars"></div>
+    <p class="section-head" style="margin-top:20px;">Protein note</p>
+    <div class="note-box">Your 0.7g/kg target = <strong>51g/day</strong>. Research supports <strong>1.6–2.2g/kg (116–160g)</strong> for optimal muscle growth. Consider targeting <strong>130g+</strong> for better results while keeping calories the same.</div>
+  </div>
+
+  <!-- WORKOUT -->
+  <div id="panel-workout" class="panel">
+    <div class="day-select-wrap">
+      <select id="day-select" onchange="renderDay()">
+        <option value="0">Day 1 — Upper 1 (Chest)</option>
+        <option value="1">Day 2 — Legs 1</option>
+        <option value="2">Day 4 — Upper 2 (Back)</option>
+        <option value="3">Day 5 — Legs 2</option>
+        <option value="4">Day 7 — Upper 3 (Shoulders)</option>
+        <option value="5">Day 8 — Legs 3</option>
+      </select>
+    </div>
+    <div id="workout-content"></div>
+    <button class="save-btn" onclick="saveWorkout()">Save session ✓</button>
+  </div>
+
+  <!-- PROGRESS -->
+  <div id="panel-progress" class="panel">
+    <p class="section-head">Training week</p>
+    <div class="week-counter">
+      <div>
+        <div class="metric-label">Week</div>
+        <div class="week-num" id="week-num">1</div>
+      </div>
+      <div class="week-info">
+        <div class="week-info-label">Program phase</div>
+        <div class="week-info-sub" id="phase-label">Building phase</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <button class="wk-btn" onclick="changeWeek(-1)">−</button>
+        <button class="wk-btn" onclick="changeWeek(1)">+</button>
+      </div>
+    </div>
+    <div id="deload-note-wrap"></div>
+    <p class="section-head">Key lift progression</p>
+    <div id="progress-lifts"></div>
+    <p class="section-head" style="margin-top:20px;">Body metrics</p>
+    <div class="metrics">
+      <div class="metric"><div class="metric-label">Weight</div><div class="metric-val" id="prog-weight">160</div><div class="metric-sub">lbs · goal: lean bulk</div></div>
+      <div class="metric"><div class="metric-label">Est. TDEE</div><div class="metric-val" id="tdee-val">2,480</div><div class="metric-sub">cal/day</div></div>
+      <div class="metric"><div class="metric-label">BMI</div><div class="metric-val" id="bmi-val">25.8</div><div class="metric-sub">5'6" / 66 inches</div></div>
+      <div class="metric"><div class="metric-label">Calorie target</div><div class="metric-val">2,600</div><div class="metric-sub">+120 surplus</div></div>
+    </div>
+    <p class="section-head">Update weight</p>
+    <div class="update-row">
+      <input type="number" id="new-weight" placeholder="160 lbs">
+      <button onclick="updateWeight()">Update</button>
+    </div>
+  </div>
+
+  <!-- SCHEDULE -->
+  <div id="panel-schedule" class="panel">
+    <p class="section-head">This week</p>
+    <div class="week-grid" id="week-grid"></div>
+    <div class="note-box" style="margin-bottom:16px;">
+      <strong>Your split:</strong> 6 lifting sessions + 2–3 easy runs + ~30 min walking per gym session. Days 3, 6 and 9 are rest/run days. Deload every 6–8 weeks — reduce sets/weight by 30–40%.
+    </div>
+    <p class="section-head">Cardio this week</p>
+    <div class="input-row"><label>Runs completed</label><input type="number" id="runs-done" min="0" max="3" value="0" oninput="updateCardio()"><span class="hint" id="run-note">/ 3 target</span></div>
+    <div class="input-row"><label>Walking sessions</label><input type="number" id="walks-done" min="0" max="6" value="0" oninput="updateCardio()"><span class="hint" id="walk-note">/ 6 sessions</span></div>
+    <div class="note-box" style="margin-top:8px;">
+      <strong>Cardio tip:</strong> Keep runs conversational pace (zone 2). 20–30 min is plenty. The 30-min post-lift walk is excellent for NEAT and fat oxidation without impacting recovery.
+    </div>
+  </div>
+</div>
+
+<script>
+const WT_KG = 72.7;
+const PROTEIN_G = Math.round(0.7 * WT_KG);
+const FAT_G = 64;
+const TOTAL_CAL = 2600;
+const CARB_G = Math.round((TOTAL_CAL - PROTEIN_G * 4 - FAT_G * 9) / 4);
+
+const days = [
+  { name:"Day 1 — Upper 1 (Chest)", lifts:[
+    {name:"Incline Barbell Bench Press",scheme:"2×5–7",type:"heavy",sets:[55,55],key:"IBB1"},
+    {name:"Chest Supported Row",scheme:"2×5–7",type:"heavy",sets:[90,90],key:"CSR1"},
+    {name:"Chest Fly",scheme:"2×8–12",type:"hyp",sets:[130,145],key:"CF1"},
+    {name:"SA Lateral Raise",scheme:"2×10–12",type:"hyp",sets:[25,25],key:"SLR1"},
+    {name:"Reverse Fly (Machine)",scheme:"2×10–12",type:"hyp",sets:[75,75],key:"RF1"},
+    {name:"Cable Bicep Curl",scheme:"3×8–12",type:"hyp",sets:[70,70,70],key:"CBC1"},
+    {name:"Cable Triceps Extension",scheme:"3×8–12",type:"hyp",sets:[80,80,80],key:"CTE1"},
+  ]},
+  { name:"Day 2 — Legs 1", lifts:[
+    {name:"Pendulum Squat",scheme:"2×5–7",type:"heavy",sets:[30,30],key:"PS2"},
+    {name:"Seated Leg Curl",scheme:"2×8–12",type:"hyp",sets:[95,95],key:"SLC2"},
+    {name:"Back Extension",scheme:"2×8–12",type:"hyp",sets:[45,45],key:"BE2"},
+    {name:"Leg Extension",scheme:"2×10–12",type:"hyp",sets:[115,115],key:"LE2"},
+    {name:"Standing Calf Press",scheme:"2×10–12",type:"hyp",sets:[130,130],key:"SCP2"},
+    {name:"Hip Adductor",scheme:"1×10–12",type:"hyp",sets:[75],key:"HA2"},
+    {name:"Cable Crunch",scheme:"2×10–12",type:"hyp",sets:[90,90],key:"CC2"},
+  ]},
+  { name:"Day 4 — Upper 2 (Back)", lifts:[
+    {name:"Lat Pulldown",scheme:"2×5–7",type:"heavy",sets:[130,130],key:"LP4"},
+    {name:"Upper Back Row",scheme:"2×5–7",type:"heavy",sets:[145,160],key:"UBR4"},
+    {name:"Chest Press (Machine)",scheme:"2×8–12",type:"hyp",sets:[90,90],key:"CPM4"},
+    {name:"SA Lateral Raise",scheme:"2×10–12",type:"hyp",sets:[25,25],key:"SLR4"},
+    {name:"Reverse Fly (Machine)",scheme:"2×10–12",type:"hyp",sets:[75,75],key:"RF4"},
+    {name:"Cable Curl (Machine)",scheme:"3×8–12",type:"hyp",sets:[70,70,70],key:"CCM4"},
+    {name:"SA Triceps Extension",scheme:"3×8–12",type:"hyp",sets:[30,30,30],key:"STE4"},
+  ]},
+  { name:"Day 5 — Legs 2", lifts:[
+    {name:"Hack Squat",scheme:"2×5–7",type:"heavy",sets:[90,90],key:"HS5"},
+    {name:"Glute Machine",scheme:"2×8–12",type:"hyp",sets:[55,55],key:"GM5"},
+    {name:"Lying Leg Curl",scheme:"2×8–12",type:"hyp",sets:[85,85],key:"LLC5"},
+    {name:"Leg Extension",scheme:"2×10–12",type:"hyp",sets:[110,110],key:"LE5"},
+    {name:"Standing Calf Press",scheme:"2×10–12",type:"hyp",sets:[130,130],key:"SCP5"},
+    {name:"Hip Adductor",scheme:"1×10–12",type:"hyp",sets:[75],key:"HA5"},
+    {name:"Machine Crunch",scheme:"2×10–12",type:"hyp",sets:[90,90],key:"MC5"},
+  ]},
+  { name:"Day 7 — Upper 3 (Shoulders)", lifts:[
+    {name:"Incline Barbell Bench Press",scheme:"2×5–7",type:"heavy",sets:[50,50],key:"IBB7"},
+    {name:"Lat Pulldown",scheme:"2×5–7",type:"heavy",sets:[130,130],key:"LP7"},
+    {name:"SA Lateral Raise",scheme:"3×10–12",type:"hyp",sets:[25,25,25],key:"SLR7"},
+    {name:"Reverse Fly (Machine)",scheme:"3×10–12",type:"hyp",sets:[75,75,75],key:"RF7"},
+    {name:"Cable Bicep Curl",scheme:"2×8–12",type:"hyp",sets:[70,70],key:"CBC7"},
+    {name:"Hammer Curl (DB)",scheme:"2×8–12",type:"hyp",sets:[30,30],key:"HC7"},
+    {name:"Rope Triceps Pushdown",scheme:"3×8–12",type:"hyp",sets:[80,80,80],key:"RTP7"},
+  ]},
+  { name:"Day 8 — Legs 3", lifts:[
+    {name:"Leg Press",scheme:"2×5–7",type:"heavy",sets:[0,0],key:"LP8"},
+    {name:"Glute Machine",scheme:"2×8–12",type:"hyp",sets:[100,100],key:"GM8"},
+    {name:"Seated Leg Curl",scheme:"2×8–12",type:"hyp",sets:[90,90],key:"SLC8"},
+    {name:"Leg Extension",scheme:"2×10–12",type:"hyp",sets:[115,115],key:"LE8"},
+    {name:"Seated Calf Press",scheme:"2×10–12",type:"hyp",sets:[45,45],key:"SCAL8"},
+    {name:"Hip Adductor",scheme:"1×10–12",type:"hyp",sets:[75],key:"HA8"},
+    {name:"Machine Crunch",scheme:"2×10–12",type:"hyp",sets:[90,90],key:"MC8"},
+  ]},
+];
+
+let state;
+try { state = JSON.parse(localStorage.getItem('fitdash_v2') || 'null'); } catch(e){}
+if (!state) state = { logs:{}, weight:160, weekDone:{}, currentWeek:1 };
+
+function save() { try { localStorage.setItem('fitdash_v2', JSON.stringify(state)); } catch(e){} }
+
+function showPanel(id, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  el.classList.add('active');
+  if (id==='progress') renderProgress();
+  if (id==='schedule') renderSchedule();
+}
+
+function initNutrition() {
+  document.getElementById('calorie-note').innerHTML =
+    '<strong>Your daily targets:</strong> ' + TOTAL_CAL + ' kcal &middot; ' + PROTEIN_G + 'g protein &middot; ' + FAT_G + 'g fat &middot; ' + CARB_G + 'g carbs. Based on your TDEE (~2,480 cal) + ~120 cal surplus for lean muscle gain.';
+  document.getElementById('macro-metrics').innerHTML =
+    '<div class="metric"><div class="metric-label">Calories</div><div class="metric-val">'+TOTAL_CAL+'</div><div class="metric-sub">kcal / day</div></div>' +
+    '<div class="metric"><div class="metric-label">Protein</div><div class="metric-val">'+PROTEIN_G+'g</div><div class="metric-sub">0.7g/kg goal</div></div>' +
+    '<div class="metric"><div class="metric-label">Carbs</div><div class="metric-val">'+CARB_G+'g</div><div class="metric-sub">primary fuel</div></div>' +
+    '<div class="metric"><div class="metric-label">Fat</div><div class="metric-val">'+FAT_G+'g</div><div class="metric-sub">0.4g / lb</div></div>';
+  renderMacroBars(0,0,0,0);
+}
+
+function renderMacroBars(cal,pro,carb,fat) {
+  const targets = [
+    {label:'Calories',val:cal,target:TOTAL_CAL,unit:'kcal',color:'#378ADD'},
+    {label:'Protein',val:pro,target:PROTEIN_G,unit:'g',color:'#1D9E75'},
+    {label:'Carbs',val:carb,target:CARB_G,unit:'g',color:'#BA7517'},
+    {label:'Fat',val:fat,target:FAT_G,unit:'g',color:'#D85A30'}
+  ];
+  document.getElementById('macro-bars').innerHTML = targets.map(t => {
+    const pct = Math.min(100, t.target > 0 ? Math.round(t.val/t.target*100) : 0);
+    return '<div class="macro-bar"><div class="macro-row"><span class="macro-name">'+t.label+'</span><div class="macro-track"><div class="macro-fill" style="width:'+pct+'%;background:'+t.color+';"></div></div><span class="macro-nums">'+Math.round(t.val)+' / '+t.target+t.unit+'</span></div></div>';
+  }).join('');
+}
+
+function updateIntake() {
+  const cal=parseFloat(document.getElementById('in-cal').value)||0;
+  const pro=parseFloat(document.getElementById('in-pro').value)||0;
+  const carb=parseFloat(document.getElementById('in-carb').value)||0;
+  const fat=parseFloat(document.getElementById('in-fat').value)||0;
+  renderMacroBars(cal,pro,carb,fat);
+  const calLeft = TOTAL_CAL - cal;
+  document.getElementById('cal-remain').textContent = calLeft > 0 ? calLeft+' remaining' : 'target reached!';
+  const proLeft = PROTEIN_G - pro;
+  document.getElementById('pro-remain').textContent = proLeft > 0 ? proLeft+'g to go' : 'target reached!';
+}
+
+function renderDay() {
+  const di = parseInt(document.getElementById('day-select').value);
+  const day = days[di];
+  const log = state.logs[di] || {};
+  let html = '<div class="day-card">';
+  html += '<div class="header-row" style="padding:10px 14px 6px;"><span class="col-label" style="text-align:left;">Exercise</span><span class="col-label">Wt</span><span class="col-label">Reps</span><span class="col-label">Status</span></div>';
+  let curType = '';
+  day.lifts.forEach(lift => {
+    if (lift.type !== curType) {
+      curType = lift.type;
+      html += '<div class="lift-section-title">'+(lift.type==='heavy'?'Heavy compounds (5–7 reps)':'Hypertrophy (8–12 reps)')+'</div>';
+    }
+    lift.sets.forEach((startW, s) => {
+      const kw = lift.key+'_s'+s+'w';
+      const kr = lift.key+'_s'+s+'r';
+      const savedW = log[kw] !== undefined ? log[kw] : (startW || '');
+      const savedR = log[kr] || '';
+      const topRep = lift.type==='heavy' ? 7 : 12;
+      const isTop = parseInt(savedR) >= topRep;
+      const pill = savedW ? (isTop ? '<span class="progress-pill pill-green">↑ add weight</span>' : savedR ? '<span class="progress-pill pill-amber">keep going</span>' : '<span class="progress-pill pill-blue">log reps</span>') : '<span class="progress-pill pill-blue">log reps</span>';
+      const setLabel = lift.sets.length > 1 ? lift.name+' <span style="color:var(--text3);font-size:11px;">set '+(s+1)+'</span>' : lift.name;
+      html += '<div class="lift-row"><div><div class="lift-name">'+setLabel+'</div><div class="lift-scheme">'+lift.scheme+'</div></div>';
+      html += '<input class="lift-field" type="number" placeholder="'+(startW||'?')+'" value="'+savedW+'" onchange="updateLog('+di+',\''+kw+'\',this.value)">';
+      html += '<input class="lift-reps" type="number" placeholder="reps" value="'+savedR+'" onchange="updateLog('+di+',\''+kr+'\',this.value);checkPill(this,\''+lift.type+'\')">';
+      html += '<div>'+pill+'</div></div>';
+    });
+  });
+  html += '</div>';
+  document.getElementById('workout-content').innerHTML = html;
+}
+
+function updateLog(di, key, val) {
+  if (!state.logs[di]) state.logs[di] = {};
+  state.logs[di][key] = val;
+  save();
+}
+
+function checkPill(el, type) {
+  const row = el.closest('.lift-row');
+  const reps = parseInt(el.value);
+  const top = type==='heavy' ? 7 : 12;
+  const pillDiv = row.querySelector('div:last-child');
+  if (!isNaN(reps)) {
+    pillDiv.innerHTML = reps >= top ? '<span class="progress-pill pill-green">↑ add weight</span>' : '<span class="progress-pill pill-amber">keep going</span>';
+  }
+}
+
+function saveWorkout() {
+  const di = parseInt(document.getElementById('day-select').value);
+  if (!state.weekDone) state.weekDone = {};
+  state.weekDone['d'+di] = true;
+  save();
+  const btn = document.querySelector('.save-btn');
+  const orig = btn.textContent;
+  btn.textContent = 'Saved! ✓';
+  setTimeout(() => btn.textContent = orig, 2000);
+}
+
+function renderProgress() {
+  const w = state.weight || 160;
+  document.getElementById('prog-weight').textContent = w;
+  const bmi = (w / (66*66) * 703).toFixed(1);
+  document.getElementById('bmi-val').textContent = bmi;
+  const tdee = Math.round(w * 15.2);
+  document.getElementById('tdee-val').textContent = tdee.toLocaleString();
+
+  const wk = state.currentWeek || 1;
+  document.getElementById('week-num').textContent = wk;
+  const isDeload = wk % 7 === 0;
+  document.getElementById('phase-label').textContent = isDeload ? 'Deload week' : 'Building phase (week '+wk+')';
+  document.getElementById('deload-note-wrap').innerHTML = isDeload
+    ? '<div class="deload-note">Deload week: reduce all sets by 30–40% and drop weight ~20%. Focus on movement quality and recovery.</div>'
+    : (wk >= 5 ? '<div class="deload-note" style="background:var(--bg2);color:var(--text2);">Deload coming up in '+(7-(wk%7))+' week(s). Plan ahead.</div>' : '');
+
+  const keyLifts = [
+    {label:"Incline Bench",dayIdx:0,key:"IBB1",startW:55,targetW:72},
+    {label:"Lat Pulldown",dayIdx:2,key:"LP4",startW:130,targetW:170},
+    {label:"Upper Back Row",dayIdx:2,key:"UBR4",startW:145,targetW:190},
+    {label:"Hack Squat",dayIdx:3,key:"HS5",startW:90,targetW:120},
+    {label:"Pendulum Squat",dayIdx:1,key:"PS2",startW:30,targetW:50},
+    {label:"Leg Press",dayIdx:5,key:"LP8",startW:180,targetW:250},
+  ];
+  document.getElementById('progress-lifts').innerHTML = keyLifts.map(l => {
+    const log = state.logs[l.dayIdx] || {};
+    const cur = parseFloat(log[l.key+'_s0w']) || l.startW;
+    const pct = Math.min(100, Math.max(0, Math.round((cur - l.startW)/(l.targetW - l.startW)*100)));
+    return '<div class="progress-item"><div class="prog-name">'+l.label+'</div><div class="prog-current">'+cur+' lb</div><div class="prog-bar-wrap"><div class="prog-bar-fill" style="width:'+pct+'%;"></div></div><div class="prog-target">→ '+l.targetW+' lb</div></div>';
+  }).join('');
+}
+
+function changeWeek(d) {
+  state.currentWeek = Math.max(1, (state.currentWeek||1) + d);
+  save();
+  renderProgress();
+}
+
+function updateWeight() {
+  const w = parseFloat(document.getElementById('new-weight').value);
+  if (!isNaN(w) && w > 50 && w < 400) {
+    state.weight = w;
+    save();
+    renderProgress();
+    document.getElementById('new-weight').value = '';
+  }
+}
+
+function renderSchedule() {
+  const labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const types = ['Upper 1','Legs 1','Run/Rest','Upper 2','Legs 2','Run/Rest','Rest'];
+  const today = new Date().getDay();
+  const todayIdx = today === 0 ? 6 : today - 1;
+  document.getElementById('week-grid').innerHTML = labels.map((d,i) => {
+    const done = state.weekDone && state.weekDone['wd'+i];
+    return '<div class="week-day'+(done?' done':'')+''+(i===todayIdx?' today':'')+'" onclick="toggleWeekDay('+i+')"><div class="week-day-label">'+d+'</div><div class="week-day-type">'+types[i]+'</div><div class="check-mark">✓</div></div>';
+  }).join('');
+  document.getElementById('runs-done').value = state.runsThisWeek || 0;
+  document.getElementById('walks-done').value = state.walksThisWeek || 0;
+  updateCardio();
+}
+
+function toggleWeekDay(i) {
+  if (!state.weekDone) state.weekDone = {};
+  state.weekDone['wd'+i] = !state.weekDone['wd'+i];
+  save();
+  renderSchedule();
+}
+
+function updateCardio() {
+  const r = parseInt(document.getElementById('runs-done').value) || 0;
+  const w = parseInt(document.getElementById('walks-done').value) || 0;
+  state.runsThisWeek = r;
+  state.walksThisWeek = w;
+  save();
+  document.getElementById('run-note').textContent = '/ 3 target — '+(r >= 3 ? 'goal met!' : r+' done');
+  document.getElementById('walk-note').textContent = '/ 6 sessions — '+(w >= 6 ? 'great week!' : w+' done');
+}
+
+initNutrition();
+renderDay();
+</script>
+</body>
+</html>
